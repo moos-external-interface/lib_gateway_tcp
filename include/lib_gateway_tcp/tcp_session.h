@@ -113,11 +113,8 @@ class tcp_session : public std::enable_shared_from_this<tcp_session>
   protected:
     std::unique_ptr<boost::asio::ip::tcp::socket>& socket() { return socket_; }
 
-    // NETSIM|[ASCII protobuf name, e.g. goby.moos.protobuf.NodeStatus]|data (b64)\n
   private:
     void read();
-    void name_read();
-    void data_read(std::uint32_t size);
 
   private:
     std::unique_ptr<boost::asio::ip::tcp::socket> socket_;

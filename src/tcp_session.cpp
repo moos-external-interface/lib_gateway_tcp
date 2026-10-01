@@ -10,6 +10,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <iostream>
+#include <memory>
 
 #include "lib_gateway_tcp/tcp_session.h"
 
@@ -22,6 +23,12 @@ gateway::tcp_session::tcp_session(std::unique_ptr<boost::asio::ip::tcp::socket> 
 void gateway::tcp_session::start()
 {
     self_ = shared_from_this();
+    boost::system::error_code ec;
+    socket_->set_option(boost::asio::ip::tcp::no_delay(true), ec);
+    if (ec)
+    {
+        std::cerr << "Warning: failed to set TCP_NODELAY: " << ec.message() << std::endl;
+    }
     read();
 }
 
@@ -64,17 +71,20 @@ void gateway::tcp_session::read()
 
 void gateway::tcp_session::write(const google::protobuf::Message& message)
 {
-    std::string bytes = preamble_ + delimiter_ + message.GetDescriptor()->full_name() + delimiter_ +
-      boost::erase_all_copy(b64_encode(message.SerializeAsString()), "\n") +
-      end_of_line_;
+    auto bytes = std::make_shared<std::string>(
+        preamble_ + delimiter_ + message.GetDescriptor()->full_name() + delimiter_ +
+        boost::erase_all_copy(b64_encode(message.SerializeAsString()), "\n") +
+        end_of_line_);
 
-    boost::asio::async_write(*socket_, boost::asio::buffer(bytes),
-			     [this](boost::system::error_code ec, std::size_t /*length*/) {
-			       if (ec)
-			       {
-				 disconnect();
-			       }
-                             });
+    boost::asio::async_write(
+        *socket_, boost::asio::buffer(*bytes),
+        [this, self = shared_from_this(), bytes](boost::system::error_code ec,
+                                                 std::size_t /*length*/) {
+          if (ec)
+          {
+            disconnect();
+          }
+        });
 }
 
 void gateway::tcp_session::disconnect() { self_.reset(); }
