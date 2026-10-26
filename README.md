@@ -6,7 +6,7 @@ Originally adopted from [GobySoft's NETSIM Libraries](https://github.com/GobySof
 
 Used by: [MOOS External Interface: Gateway](https://github.com/moos-external-interface/moos-ivp-gateway)
 - [moos-ivp-gateway](https://github.com/moos-external-interface/moos-ivp-gateway) — MOOS-IvP TCP gateway and client
-- [protobuf_client_ros2](https://github.com/moos-external-interface/protobuf_client_ros2) — ROS 2 TCP client node
+- [protobuf_client](https://github.com/moos-external-interface/protobuf_client) — ROS 2 TCP client node
 
 ---
 
